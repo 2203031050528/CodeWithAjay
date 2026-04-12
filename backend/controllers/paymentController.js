@@ -33,13 +33,15 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Course already purchased' });
     }
 
+    const receiptId = `rcpt_${req.user._id.toString().slice(-6)}_${Date.now().toString().slice(-6)}`;
+
     const options = {
       amount: course.price * 100, // Convert to paise (₹49 → 4900 paise)
       currency: 'INR',
-      receipt: `receipt_${req.user._id}_${courseId}_${Date.now()}`,
+      receipt: receiptId,
       notes: {
         userId: req.user._id.toString(),
-        courseId: courseId,
+        courseId: courseId.toString(),
       },
     };
 
@@ -64,7 +66,8 @@ exports.createOrder = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    const errorMessage = error.error?.description || error.message || 'Payment initiation failed';
+    res.status(500).json({ success: false, message: errorMessage });
   }
 };
 
