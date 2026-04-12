@@ -138,12 +138,60 @@ const Syllabus = ({ data, compact = false, availableContent = [], activeVideoId 
                             }}
                           />
                           <span className="text-slate-200 font-medium text-sm">{section.title}</span>
-                          <span className="text-slate-600 text-xs ml-auto">
+                          <span className="text-slate-600 text-xs ml-auto flex items-center gap-2">
+                            {availableContent.filter(c => c.topicId === section.sectionId).length > 0 && (
+                                <span className="badge badge-primary text-[10px] !py-0 !px-2 bg-indigo-500/20 text-indigo-300">
+                                  {availableContent.filter(c => c.topicId === section.sectionId).length} Attachments
+                                </span>
+                            )}
                             {section.topics.reduce((a, t) => a + t.items.length, 0)} topics
                           </span>
                         </button>
 
-                        {/* Section Topics */}
+                        {/* Section Content (Videos/PDFs/Images) */}
+                        {isSectionExpanded && (
+                          <div className="ml-5 mt-3 space-y-1.5 animate-fade-in mb-4">
+                            {availableContent.filter(c => c.topicId === section.sectionId).map((mappedContent, mIdx) => {
+                              const isClickable = !!onContentClick;
+                              const isActive = mappedContent._id === activeVideoId;
+                              const isCompleted = completedVideoIds.has(mappedContent._id);
+
+                              return (
+                                <div
+                                  key={mIdx}
+                                  onClick={() => isClickable && onContentClick(mappedContent)}
+                                  className={`flex items-start gap-3 py-2 px-3 rounded-lg transition-colors ${
+                                    isClickable ? 'cursor-pointer hover:bg-white/10' : ''
+                                  }`}
+                                  style={{
+                                    background: isActive ? 'rgba(99, 102, 241, 0.2)' : 'rgba(15, 13, 26, 0.4)',
+                                    border: isActive ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid rgba(255, 255, 255, 0.05)',
+                                  }}
+                                >
+                                  <div className="mt-0.5 flex-shrink-0">
+                                    {isCompleted ? (
+                                      <HiCheckCircle className="text-emerald-400 text-base" />
+                                    ) : isActive ? (
+                                      <HiPlay className="text-primary-400 text-base" />
+                                    ) : (
+                                      <HiPlay className="text-primary-400/60 text-base" />
+                                    )}
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <span className={`text-sm leading-relaxed block ${isActive ? 'text-white font-semibold' : 'text-slate-200'}`}>
+                                      {mappedContent.title || 'Course Content'}
+                                    </span>
+                                    {mappedContent.duration > 0 && (
+                                      <span className="text-xs text-slate-500">{mappedContent.duration} min</span>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+
+                        {/* Section Topics (Text mapping) */}
                         {isSectionExpanded && (
                           <div className="ml-5 mt-2 space-y-3 animate-fade-in">
                             {section.topics.map((topic, tIdx) => (
@@ -162,49 +210,14 @@ const Syllabus = ({ data, compact = false, availableContent = [], activeVideoId 
                                   </div>
                                 )}
                                 <div className="ml-4 grid grid-cols-1 sm:grid-cols-2 gap-1">
-                                  {topic.items.map((item, iIdx) => {
-                                    // Check if there is uploaded content matching this topicId
-                                    const mappedContent = availableContent.find(c => c.topicId === item.topicId);
-                                    const isClickable = !!mappedContent && !!onContentClick;
-                                    const isActive = mappedContent && mappedContent._id === activeVideoId;
-                                    const isCompleted = mappedContent && completedVideoIds.has(mappedContent._id);
-
-                                    return (
-                                      <div
-                                        key={iIdx}
-                                        onClick={() => isClickable && onContentClick(mappedContent)}
-                                        className={`flex items-start gap-2 py-1.5 px-2 rounded-lg transition-colors ${
-                                          isClickable ? 'cursor-pointer hover:bg-white/5' : ''
-                                        }`}
-                                        style={{
-                                          background: isActive ? 'rgba(99, 102, 241, 0.15)' : 'transparent',
-                                          border: isActive ? '1px solid rgba(99, 102, 241, 0.3)' : '1px solid transparent',
-                                        }}
-                                      >
-                                        <div className="mt-0.5 flex-shrink-0">
-                                          {isCompleted ? (
-                                            <HiCheckCircle className="text-emerald-400 text-sm" />
-                                          ) : isActive ? (
-                                            <HiPlay className="text-primary-400 text-sm" />
-                                          ) : isClickable ? (
-                                            <HiPlay className="text-primary-400/50 text-sm" />
-                                          ) : availableContent.length > 0 ? (
-                                            <HiLockClosed className="text-slate-600 text-xs" />
-                                          ) : (
-                                            <HiCheckCircle className="text-xs" style={{ color: `${module.color}80` }} />
-                                          )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                          <span className={`text-xs leading-relaxed block ${isActive ? 'text-white font-medium' : isClickable ? 'text-slate-300' : 'text-slate-500'}`}>
-                                            {item.title}
-                                          </span>
-                                          {mappedContent && mappedContent.duration > 0 && (
-                                            <span className="text-[10px] text-slate-500">{mappedContent.duration} min</span>
-                                          )}
-                                        </div>
-                                      </div>
-                                    );
-                                  })}
+                                  {topic.items.map((item, iIdx) => (
+                                    <div key={iIdx} className="flex items-start gap-2 py-1">
+                                      <HiCheckCircle className="text-xs mt-0.5 flex-shrink-0" style={{
+                                        color: `${module.color}80`,
+                                      }} />
+                                      <span className="text-slate-400 text-xs leading-relaxed">{item.title}</span>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
                             ))}

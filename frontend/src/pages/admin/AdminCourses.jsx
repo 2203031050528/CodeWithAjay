@@ -4,6 +4,7 @@ import toast from 'react-hot-toast';
 import { HiPlus, HiPencil, HiTrash, HiX, HiPlay, HiArrowLeft } from 'react-icons/hi';
 import { Link } from 'react-router-dom';
 import syllabusData from '../../data/syllabusData';
+import axios from 'axios';
 
 const AdminCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -13,7 +14,8 @@ const AdminCourses = () => {
   const [editCourse, setEditCourse] = useState(null);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
   const [formData, setFormData] = useState({ title: '', description: '', price: 49, thumbnail: '' });
-  const [videoForm, setVideoForm] = useState({ title: '', contentUrl: '', contentType: 'video', duration: 0, topicId: '' });
+  const [videoForm, setVideoForm] = useState({ title: '', contentUrl: '', file: null, contentType: 'video', duration: 0, topicId: '' });
+  const [uploading, setUploading] = useState(false);
 
   const fetchCourses = async () => {
     try {
@@ -60,14 +62,47 @@ const AdminCourses = () => {
 
   const handleAddVideo = async (e) => {
     e.preventDefault();
+    if (!videoForm.topicId) return toast.error('Please select a syllabus topic');
+
     try {
-      await API.post(`/admin/course/${selectedCourseId}/video`, videoForm);
-      toast.success('Video added');
+      setUploading(true);
+      let finalContentUrl = videoForm.contentUrl;
+
+      // Handle Cloudinary upload if file is selected
+      if ((videoForm.contentType === 'pdf' || videoForm.contentType === 'image') && videoForm.file) {
+        const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+        const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+        if (!cloudName || !uploadPreset || cloudName.includes('YOUR_CLOUD_NAME')) {
+           setUploading(false);
+           return toast.error('Cloudinary environment variables missing! Please check .env');
+        }
+
+        const data = new FormData();
+        data.append('file', videoForm.file);
+        data.append('upload_preset', uploadPreset);
+
+        toast.loading('Uploading file to Cloudinary...', { id: 'upload' });
+        const res = await axios.post(`https://api.cloudinary.com/v1_1/${cloudName}/${videoForm.contentType === 'image' ? 'image' : 'raw'}/upload`, data);
+        finalContentUrl = res.data.secure_url;
+        toast.success('File uploaded!', { id: 'upload' });
+      }
+
+      await API.post(`/admin/course/${selectedCourseId}/video`, {
+        ...videoForm,
+        contentUrl: finalContentUrl,
+      });
+
+      toast.success('Content added to topic successfully');
       setShowVideoModal(false);
-      setVideoForm({ title: '', contentUrl: '', contentType: 'video', duration: 0, topicId: '' });
+      setVideoForm({ title: '', contentUrl: '', file: null, contentType: 'video', duration: 0, topicId: '' });
       fetchCourses();
     } catch (error) {
-      toast.error('Failed to add video');
+      toast.dismiss('upload');
+      toast.error('Failed to add content');
+      console.error(error);
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -259,18 +294,14 @@ const AdminCourses = () => {
                   className="input-field"
                   required
                 >
-                  <option value="">-- Select a topic --</option>
+                  <option value="">-- Select a section --</option>
                   {syllabusData.map(module => (
                     <optgroup key={module.id} label={`${module.title}`}>
-                      {module.sections.map(section => 
-                        section.topics.map(topic => 
-                          topic.items.map(item => (
-                            <option key={item.topicId} value={item.topicId}>
-                              - {item.title}
-                            </option>
-                          ))
-                        )
-                      )}
+                      {module.sections.map(section => (
+                        <option key={section.sectionId} value={section.sectionId}>
+                          - {section.title}
+                        </option>
+                      ))}
                     </optgroup>
                   ))}
                 </select>
@@ -298,17 +329,31 @@ const AdminCourses = () => {
                   <option value="image">Image</option>
                 </select>
               </div>
-              <div>
-                <label className="block text-sm font-medium text-slate-300 mb-1.5">Content URL</label>
-                <input
-                  type="url"
-                  value={videoForm.contentUrl}
-                  onChange={(e) => setVideoForm({ ...videoForm, contentUrl: e.target.value })}
-                  className="input-field"
-                  placeholder="URL for video, PDF, or image"
-                  required
-                />
-              </div>
+              {videoForm.contentType === 'video' ? (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">YouTube Video URL</label>
+                  <input
+                    type="url"
+                    value={videoForm.contentUrl}
+                    onChange={(e) => setVideoForm({ ...videoForm, contentUrl: e.target.value })}
+                    className="input-field"
+                    placeholder="URL for unlisted YouTube video"
+                    required
+                  />
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-1.5">Upload File</label>
+                  <input
+                    type="file"
+                    onChange={(e) => setVideoForm({ ...videoForm, file: e.target.files[0] })}
+                    className="input-field cursor-pointer"
+                    accept={videoForm.contentType === 'pdf' ? 'application/pdf' : 'image/*'}
+                    required
+                  />
+                  <p className="text-xs text-slate-500 mt-1">File will be securely uploaded to Cloudinary</p>
+                </div>
+              )}
               <div>
                 <label className="block text-sm font-medium text-slate-300 mb-1.5">Duration (minutes)</label>
                 <input
@@ -319,7 +364,9 @@ const AdminCourses = () => {
                   min="0"
                 />
               </div>
-              <button type="submit" className="gradient-btn w-full !mt-6">Add Content</button>
+              <button type="submit" className="gradient-btn w-full !mt-6" disabled={uploading}>
+                {uploading ? 'Processing...' : 'Add Content'}
+              </button>
             </form>
           </div>
         </div>

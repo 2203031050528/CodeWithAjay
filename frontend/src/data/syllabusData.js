@@ -677,6 +677,7 @@ const generateSlug = (text) => text.toLowerCase().replace(/[^a-z0-9]+/g, '-').re
 
 syllabusData.forEach(module => {
   module.sections.forEach(section => {
+    section.sectionId = `${module.id}-${generateSlug(section.title)}`;
     section.topics.forEach(topic => {
       topic.items = topic.items.map(item => ({
         title: item,
