@@ -91,10 +91,6 @@ cd backend
 npm run seed
 ```
 
-This creates:
-- **Admin user**: `admin@codewithajay.com` / `admin123`
-- **Sample course** with 5 demo videos
-
 ### 4. Run Development Servers
 
 ```bash
@@ -109,11 +105,6 @@ npm run dev
 
 Open **http://localhost:5173** in your browser.
 
-## 👤 Default Accounts
-
-| Role | Email | Password |
-|------|-------|----------|
-| Admin | admin@codewithajay.com | admin123 |
 
 ## 💳 Razorpay Test Card
 
