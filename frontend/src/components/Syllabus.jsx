@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { HiChevronDown, HiChevronRight, HiCheckCircle, HiInformationCircle, HiPlay, HiLockClosed } from 'react-icons/hi';
+import { HiChevronDown, HiChevronRight, HiCheckCircle, HiPlay, HiLockClosed, HiDocumentText, HiPhotograph } from 'react-icons/hi';
 
 const Syllabus = ({ data, compact = false, availableContent = [], activeVideoId = null, completedVideoIds = new Set(), onContentClick = null }) => {
   const [expandedModules, setExpandedModules] = useState(new Set());
@@ -155,6 +155,17 @@ const Syllabus = ({ data, compact = false, availableContent = [], activeVideoId 
                               const isClickable = !!onContentClick;
                               const isActive = mappedContent._id === activeVideoId;
                               const isCompleted = completedVideoIds.has(mappedContent._id);
+                              
+                              const getIcon = (isActive) => {
+                                if (isCompleted) return <HiCheckCircle className="text-emerald-400 text-base" />;
+                                
+                                const alpha = isActive ? '' : '/60';
+                                const colorClass = `text-primary-400${alpha} text-base`;
+                                
+                                if (mappedContent.contentType === 'pdf') return <HiDocumentText className={colorClass} />;
+                                if (mappedContent.contentType === 'image') return <HiPhotograph className={colorClass} />;
+                                return <HiPlay className={colorClass} />;
+                              };
 
                               return (
                                 <div
@@ -169,13 +180,7 @@ const Syllabus = ({ data, compact = false, availableContent = [], activeVideoId 
                                   }}
                                 >
                                   <div className="mt-0.5 flex-shrink-0">
-                                    {isCompleted ? (
-                                      <HiCheckCircle className="text-emerald-400 text-base" />
-                                    ) : isActive ? (
-                                      <HiPlay className="text-primary-400 text-base" />
-                                    ) : (
-                                      <HiPlay className="text-primary-400/60 text-base" />
-                                    )}
+                                    {getIcon(isActive)}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <span className={`text-sm leading-relaxed block ${isActive ? 'text-white font-semibold' : 'text-slate-200'}`}>

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { HiDownload, HiDocumentDownload } from 'react-icons/hi';
 
 const VideoPlayer = ({ contentUrl, contentType = 'video', videoId, courseId, videoDuration, onProgressUpdate }) => {
   const timerRef = useRef(null);
@@ -58,20 +59,37 @@ const VideoPlayer = ({ contentUrl, contentType = 'video', videoId, courseId, vid
   const renderContent = () => {
     if (contentType === 'image') {
       return (
-        <div className="w-full h-full flex items-center justify-center bg-[#0a0a12]">
-          <img src={contentUrl} alt="Course Content" className="max-w-full max-h-full object-contain" />
+        <div className="w-full h-full flex flex-col items-center justify-center bg-[#0a0a12] relative group">
+          <img src={contentUrl} alt="Course Content" className="max-w-full max-h-full object-contain p-2" />
+          <div className="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-opacity">
+            <a 
+              href={contentUrl} 
+              download
+              className="gradient-btn flex items-center gap-2 !py-2 shadow-xl"
+            >
+              <HiDownload /> Download Full Size
+            </a>
+          </div>
         </div>
       );
     }
     
     if (contentType === 'pdf') {
       return (
-        <iframe
-          src={contentUrl}
-          title="Course PDF"
-          className="w-full h-full"
-          style={{ border: 'none' }}
-        />
+        <div className="w-full h-full flex flex-col items-center justify-center bg-[#0a0a12] p-8 text-center min-h-[400px]">
+          <div className="w-20 h-20 rounded-2xl bg-indigo-500/10 flex items-center justify-center mb-6">
+            <HiDocumentDownload className="text-5xl text-indigo-400" />
+          </div>
+          <h3 className="text-xl font-bold text-white mb-2">PDF Resource Document</h3>
+          <p className="text-slate-400 max-w-md mb-8">This resource is a downloadable PDF document. Click below to safely download or view it natively in your browser.</p>
+          <a 
+            href={contentUrl} 
+            download
+            className="gradient-btn flex items-center gap-2"
+          >
+            <HiDownload className="text-lg" /> Download PDF File
+          </a>
+        </div>
       );
     }
 
@@ -94,15 +112,19 @@ const VideoPlayer = ({ contentUrl, contentType = 'video', videoId, courseId, vid
 
   return (
     <div>
-      <div className="aspect-video rounded-xl overflow-hidden" style={{
-        border: '1px solid rgba(99, 102, 241, 0.15)',
-        boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
-      }}>
+      <div 
+        className={`rounded-xl overflow-hidden relative ${contentType === 'video' ? 'aspect-video' : 'min-h-[400px]'}`} 
+        style={{
+          border: '1px solid rgba(99, 102, 241, 0.15)',
+          boxShadow: '0 10px 40px rgba(0,0,0,0.3)',
+          background: '#0a0a12'
+        }}
+      >
         {renderContent()}
       </div>
       <div className="flex items-center justify-between mt-3 px-1">
         <p className="text-slate-500 text-xs">
-          ⏱ Time watched: <span className="text-primary-400 font-medium">{formatTime(watchTime)}</span>
+          ⏱ Time spent: <span className="text-primary-400 font-medium">{formatTime(watchTime)}</span>
         </p>
         {videoDuration > 0 && (
           <p className="text-slate-500 text-xs">

@@ -13,6 +13,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCourses from './pages/admin/AdminCourses';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminPayments from './pages/admin/AdminPayments';
+import AdminCoupons from './pages/admin/AdminCoupons';
 
 function App() {
   return (
@@ -48,6 +49,9 @@ function App() {
           } />
           <Route path="/admin/payments" element={
             <AdminRoute><AdminPayments /></AdminRoute>
+          } />
+          <Route path="/admin/coupons" element={
+            <AdminRoute><AdminCoupons /></AdminRoute>
           } />
 
           {/* 404 */}

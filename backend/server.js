@@ -28,6 +28,7 @@ app.use('/api/courses', require('./routes/courses'));
 app.use('/api/payment', require('./routes/payment'));
 app.use('/api/progress', require('./routes/progress'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/coupons', require('./routes/couponRoutes'));
 
 // Health check
 app.get('/api/health', (req, res) => {

@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -24,8 +25,12 @@ const userSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['user', 'admin'],
+    enum: ['user', 'admin', 'partner'],
     default: 'user',
+  },
+  canGenerateReferral: {
+    type: Boolean,
+    default: false,
   },
   purchasedCourses: [{
     type: mongoose.Schema.Types.ObjectId,
@@ -39,8 +44,22 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  referralCode: {
+    type: String,
+    unique: true,
+    sparse: true, // allows null values while maintaining uniqueness
+  },
 }, {
   timestamps: true,
+});
+
+// Generate unique referral code before first save
+userSchema.pre('save', async function (next) {
+  if (this.isNew && !this.referralCode) {
+    const randomPart = crypto.randomBytes(4).toString('hex').toUpperCase();
+    this.referralCode = `REF_${randomPart}`;
+  }
+  next();
 });
 
 // Hash password before saving

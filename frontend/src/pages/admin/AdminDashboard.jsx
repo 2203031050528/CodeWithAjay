@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
 import StatsCard from '../../components/StatsCard';
-import { HiUsers, HiCurrencyRupee, HiChartBar, HiBookOpen, HiCollection, HiCreditCard, HiArrowRight } from 'react-icons/hi';
+import { HiUsers, HiCurrencyRupee, HiChartBar, HiBookOpen, HiCollection, HiCreditCard, HiArrowRight, HiTag } from 'react-icons/hi';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -36,6 +36,7 @@ const AdminDashboard = () => {
     { to: '/admin/courses', icon: <HiBookOpen />, label: 'Manage Courses', color: '#6366f1' },
     { to: '/admin/users', icon: <HiUsers />, label: 'Manage Users', color: '#06b6d4' },
     { to: '/admin/payments', icon: <HiCreditCard />, label: 'View Payments', color: '#10b981' },
+    { to: '/admin/coupons', icon: <HiTag />, label: 'Manage Coupons', color: '#f59e0b' },
   ];
 
   return (

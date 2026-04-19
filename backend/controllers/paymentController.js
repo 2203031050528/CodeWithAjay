@@ -3,6 +3,9 @@ const crypto = require('crypto');
 const Payment = require('../models/Payment');
 const User = require('../models/User');
 const Course = require('../models/Course');
+const Coupon = require('../models/Coupon');
+const CouponUsage = require('../models/CouponUsage');
+const { validateCoupon, calculateDiscount } = require('./couponController');
 
 // Initialize Razorpay
 const razorpayInstance = new Razorpay({
@@ -20,7 +23,7 @@ exports.getRazorpayKey = (req, res) => {
 // @route   POST /api/payment/create-order
 exports.createOrder = async (req, res) => {
   try {
-    const { courseId } = req.body;
+    const { courseId, couponCode } = req.body;
 
     // Check if course exists
     const course = await Course.findById(courseId);
@@ -33,15 +36,84 @@ exports.createOrder = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Course already purchased' });
     }
 
+    let finalPrice = course.price;
+    let discount = 0;
+    let appliedCouponCode = null;
+
+    // Apply coupon if provided
+    if (couponCode) {
+      const coupon = await Coupon.findOne({ code: couponCode.toUpperCase() });
+      const validation = validateCoupon(coupon, req.user._id);
+
+      if (!validation.valid) {
+        return res.status(400).json({ success: false, message: validation.message });
+      }
+
+      discount = calculateDiscount(coupon, course.price);
+      finalPrice = Math.max(0, course.price - discount);
+      appliedCouponCode = coupon.code;
+    }
+
+    // If price is 0 after discount, skip Razorpay and grant access directly
+    if (finalPrice === 0) {
+      // Record coupon usage
+      if (appliedCouponCode) {
+        await Coupon.findOneAndUpdate(
+          { code: appliedCouponCode },
+          {
+            $inc: { usedCount: 1 },
+            $addToSet: { usersUsed: req.user._id },
+          }
+        );
+
+        await CouponUsage.create({
+          code: appliedCouponCode,
+          userId: req.user._id,
+          courseId,
+          discountApplied: discount,
+          originalPrice: course.price,
+          finalPrice: 0,
+        });
+      }
+
+      // Grant course access
+      await User.findByIdAndUpdate(req.user._id, {
+        $addToSet: { purchasedCourses: courseId },
+      });
+
+      // Create a payment record for tracking
+      await Payment.create({
+        userId: req.user._id,
+        courseId,
+        amount: 0,
+        razorpayOrderId: `free_${Date.now()}`,
+        status: 'paid',
+        couponCode: appliedCouponCode,
+        discount,
+        originalAmount: course.price,
+      });
+
+      return res.json({
+        success: true,
+        data: {
+          free: true,
+          message: 'Course unlocked for free with 100% discount!',
+        },
+      });
+    }
+
     const receiptId = `rcpt_${req.user._id.toString().slice(-6)}_${Date.now().toString().slice(-6)}`;
 
     const options = {
-      amount: course.price * 100, // Convert to paise (₹49 → 4900 paise)
+      amount: finalPrice * 100, // Convert to paise
       currency: 'INR',
       receipt: receiptId,
       notes: {
         userId: req.user._id.toString(),
         courseId: courseId.toString(),
+        couponCode: appliedCouponCode || '',
+        discount: discount.toString(),
+        originalPrice: course.price.toString(),
       },
     };
 
@@ -51,7 +123,10 @@ exports.createOrder = async (req, res) => {
     await Payment.create({
       userId: req.user._id,
       courseId,
-      amount: course.price,
+      amount: finalPrice,
+      originalAmount: course.price,
+      discount,
+      couponCode: appliedCouponCode,
       razorpayOrderId: order.id,
       status: 'created',
     });
@@ -63,6 +138,10 @@ exports.createOrder = async (req, res) => {
         amount: order.amount,
         currency: order.currency,
         courseName: course.title,
+        originalPrice: course.price,
+        discount,
+        finalPrice,
+        couponApplied: appliedCouponCode,
       },
     });
   } catch (error) {
@@ -93,6 +172,9 @@ exports.verifyPayment = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Payment verification failed' });
     }
 
+    // Get the payment record to find coupon details
+    const paymentRecord = await Payment.findOne({ razorpayOrderId: razorpay_order_id });
+
     // Update payment record
     await Payment.findOneAndUpdate(
       { razorpayOrderId: razorpay_order_id },
@@ -102,6 +184,26 @@ exports.verifyPayment = async (req, res) => {
         status: 'paid',
       }
     );
+
+    // Record coupon usage after successful payment
+    if (paymentRecord?.couponCode) {
+      await Coupon.findOneAndUpdate(
+        { code: paymentRecord.couponCode },
+        {
+          $inc: { usedCount: 1 },
+          $addToSet: { usersUsed: req.user._id },
+        }
+      );
+
+      await CouponUsage.create({
+        code: paymentRecord.couponCode,
+        userId: req.user._id,
+        courseId,
+        discountApplied: paymentRecord.discount || 0,
+        originalPrice: paymentRecord.originalAmount || paymentRecord.amount,
+        finalPrice: paymentRecord.amount,
+      });
+    }
 
     // Add course to user's purchased courses
     await User.findByIdAndUpdate(req.user._id, {

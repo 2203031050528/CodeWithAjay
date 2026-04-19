@@ -51,14 +51,14 @@ exports.getAllUsers = async (req, res) => {
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const users = await User.find({ role: 'user' })
+    const users = await User.find({ role: { $in: ['user', 'partner'] } })
       .select('-password')
       .populate('purchasedCourses', 'title')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
-    const total = await User.countDocuments({ role: 'user' });
+    const total = await User.countDocuments({ role: { $in: ['user', 'partner'] } });
 
     res.json({
       success: true,
@@ -214,3 +214,62 @@ exports.getAllPayments = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Make a user a partner (collaborator)
+// @route   PUT /api/admin/make-partner/:userId
+exports.makePartner = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Validate ObjectId format
+    const mongoose = require('mongoose');
+    if (!mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ success: false, message: 'Invalid user ID' });
+    }
+
+    // Prevent admin from making themselves a partner
+    if (req.user._id.toString() === userId) {
+      return res.status(400).json({ success: false, message: 'You cannot change your own role' });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+
+    if (user.role === 'admin') {
+      return res.status(400).json({ success: false, message: 'Cannot change role of another admin' });
+    }
+
+    if (user.role === 'partner') {
+      return res.status(400).json({ success: false, message: 'User is already a partner' });
+    }
+
+    // Update role and enable referral generation
+    user.role = 'partner';
+    user.canGenerateReferral = true;
+
+    // Generate referral code if not already present
+    if (!user.referralCode) {
+      const crypto = require('crypto');
+      const randomPart = crypto.randomBytes(4).toString('hex').toUpperCase();
+      user.referralCode = `REF_${randomPart}`;
+    }
+
+    await user.save();
+
+    // Return user without sensitive fields
+    const updatedUser = await User.findById(userId)
+      .select('-password')
+      .populate('purchasedCourses', 'title');
+
+    res.json({
+      success: true,
+      message: `${updatedUser.name} has been promoted to partner`,
+      data: updatedUser,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+

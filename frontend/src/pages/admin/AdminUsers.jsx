@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import API from '../../api/axios';
-import { HiArrowLeft, HiSearch, HiCheckCircle, HiXCircle } from 'react-icons/hi';
+import toast from 'react-hot-toast';
+import { HiArrowLeft, HiSearch, HiCheckCircle, HiXCircle, HiStar } from 'react-icons/hi';
 
 const AdminUsers = () => {
   const [users, setUsers] = useState([]);
@@ -23,6 +24,17 @@ const AdminUsers = () => {
   };
 
   useEffect(() => { fetchUsers(); }, [page]);
+
+  const handleMakePartner = async (userId, userName) => {
+    if (!window.confirm(`Promote "${userName}" to Partner? They will be able to generate referral codes.`)) return;
+    try {
+      const { data } = await API.put(`/admin/make-partner/${userId}`);
+      toast.success(data.message || `${userName} is now a Partner!`);
+      fetchUsers();
+    } catch (error) {
+      toast.error(error.response?.data?.message || 'Failed to update user role');
+    }
+  };
 
   const formatDate = (date) => {
     return new Date(date).toLocaleDateString('en-IN', {
@@ -84,9 +96,11 @@ const AdminUsers = () => {
             <tr>
               <th>User</th>
               <th>Email</th>
+              <th>Role</th>
               <th>Purchased</th>
               <th>Time Spent</th>
               <th>Joined</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -104,6 +118,11 @@ const AdminUsers = () => {
                 </td>
                 <td className="text-slate-400">{user.email}</td>
                 <td>
+                  <span className={`badge ${user.role === 'partner' ? 'badge-info' : 'badge-warning'}`}>
+                    {user.role === 'partner' ? <><HiStar className="mr-1" /> Partner</> : 'User'}
+                  </span>
+                </td>
+                <td>
                   {user.purchasedCourses?.length > 0 ? (
                     <span className="badge badge-success">
                       <HiCheckCircle className="mr-1" /> {user.purchasedCourses.length} course(s)
@@ -116,6 +135,26 @@ const AdminUsers = () => {
                 </td>
                 <td className="text-slate-300">{formatTime(user.totalTimeSpent)}</td>
                 <td className="text-slate-400">{formatDate(user.createdAt)}</td>
+                <td>
+                  {user.role !== 'partner' ? (
+                    <button
+                      onClick={() => handleMakePartner(user._id, user.name)}
+                      className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5"
+                      id={`make-partner-${user._id}`}
+                      style={{
+                        background: 'rgba(245, 158, 11, 0.15)',
+                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                        color: '#fbbf24',
+                      }}
+                    >
+                      <HiStar /> Make Partner
+                    </button>
+                  ) : (
+                    <span className="text-emerald-400 text-xs flex items-center gap-1">
+                      <HiCheckCircle /> Partner
+                    </span>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>

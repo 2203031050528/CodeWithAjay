@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { HiUser, HiMail, HiLockClosed, HiArrowRight } from 'react-icons/hi';
 
@@ -12,6 +12,15 @@ const Register = () => {
   const [error, setError] = useState('');
   const { register, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // Capture referral code from URL and store in localStorage
+  useEffect(() => {
+    const refCode = searchParams.get('ref');
+    if (refCode) {
+      localStorage.setItem('cwa_referral_code', refCode.toUpperCase());
+    }
+  }, [searchParams]);
 
   if (isAuthenticated) {
     navigate('/dashboard', { replace: true });

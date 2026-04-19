@@ -5,13 +5,16 @@ import API from '../api/axios';
 import StatsCard from '../components/StatsCard';
 import CourseCard from '../components/CourseCard';
 import useProgress from '../hooks/useProgress';
-import { HiBookOpen, HiClock, HiChartBar, HiAcademicCap } from 'react-icons/hi';
+import { HiBookOpen, HiClock, HiChartBar, HiAcademicCap, HiShare, HiClipboardCopy, HiCheck } from 'react-icons/hi';
+import toast from 'react-hot-toast';
 
 const Dashboard = () => {
   const { user, refreshUser } = useAuth();
   const [courses, setCourses] = useState([]);
   const [progressMap, setProgressMap] = useState({});
   const [loading, setLoading] = useState(true);
+  const [referralStats, setReferralStats] = useState(null);
+  const [copied, setCopied] = useState(false);
   const { getProgress } = useProgress();
 
   useEffect(() => {
@@ -35,6 +38,14 @@ const Dashboard = () => {
             }
           });
           setProgressMap(map);
+        }
+
+        // Fetch referral stats
+        try {
+          const { data: refData } = await API.get('/coupons/my-stats');
+          setReferralStats(refData.data);
+        } catch (err) {
+          console.error('Failed to load referral stats:', err);
         }
       } catch (error) {
         console.error('Failed to load dashboard:', error);
@@ -60,6 +71,15 @@ const Dashboard = () => {
   const avgProgress = enrolledCourses.length > 0
     ? Math.round(Object.values(progressMap).reduce((a, b) => a + b, 0) / enrolledCourses.length)
     : 0;
+
+  const handleCopyReferral = () => {
+    if (referralStats?.referralLink) {
+      navigator.clipboard.writeText(referralStats.referralLink);
+      setCopied(true);
+      toast.success('Referral link copied!');
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   if (loading) {
     return (
@@ -120,6 +140,63 @@ const Dashboard = () => {
         />
       </div>
 
+      {/* Referral Section — only visible to partners and admins */}
+      {referralStats?.eligible && referralStats?.referralCode && (
+        <div className="glass p-6 mb-10 animate-fade-in" style={{
+          background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(6, 182, 212, 0.05))',
+          border: '1px solid rgba(16, 185, 129, 0.15)',
+        }}>
+          <div className="flex items-center gap-2 mb-4">
+            <HiShare className="text-emerald-400 text-lg" />
+            <h3 className="text-base font-semibold text-white">Your Referral Program</h3>
+          </div>
+          <p className="text-slate-400 text-sm mb-4">
+            Share your referral link and give your friends a <span className="text-emerald-400 font-medium">10% discount</span> on any course!
+          </p>
+
+          {/* Referral Link */}
+          <div className="flex items-stretch gap-2 mb-5">
+            <div className="flex-1 p-3 rounded-lg text-sm font-mono truncate" style={{
+              background: 'rgba(15, 13, 26, 0.6)',
+              border: '1px solid rgba(99, 102, 241, 0.15)',
+              color: '#94a3b8',
+            }}>
+              {referralStats.referralLink}
+            </div>
+            <button
+              onClick={handleCopyReferral}
+              className="px-4 rounded-lg text-sm font-medium transition-all cursor-pointer flex items-center gap-2"
+              id="copy-referral-btn"
+              style={{
+                background: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(99, 102, 241, 0.15)',
+                border: `1px solid ${copied ? 'rgba(16, 185, 129, 0.3)' : 'rgba(99, 102, 241, 0.3)'}`,
+                color: copied ? '#34d399' : '#a5b4fc',
+              }}
+            >
+              {copied ? <><HiCheck /> Copied</> : <><HiClipboardCopy /> Copy</>}
+            </button>
+          </div>
+
+          {/* Referral Stats */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-xl text-center" style={{
+              background: 'rgba(15, 13, 26, 0.5)',
+              border: '1px solid rgba(99, 102, 241, 0.1)',
+            }}>
+              <p className="text-2xl font-bold text-white">{referralStats.totalUses}</p>
+              <p className="text-slate-500 text-xs mt-1">Total Referrals</p>
+            </div>
+            <div className="p-4 rounded-xl text-center" style={{
+              background: 'rgba(15, 13, 26, 0.5)',
+              border: '1px solid rgba(99, 102, 241, 0.1)',
+            }}>
+              <p className="text-2xl font-bold text-emerald-400">₹{referralStats.totalEarnings}</p>
+              <p className="text-slate-500 text-xs mt-1">Discounts Given</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Enrolled Courses */}
       {enrolledCourses.length > 0 && (
         <div className="mb-12">
@@ -169,3 +246,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

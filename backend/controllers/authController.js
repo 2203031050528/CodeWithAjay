@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const Coupon = require('../models/Coupon');
 
 // Generate JWT token
 const generateToken = (id) => {
@@ -18,8 +19,24 @@ exports.register = async (req, res) => {
       return res.status(400).json({ success: false, message: 'User already exists with this email' });
     }
 
-    // Create user
+    // Create user (referralCode is auto-generated via pre-save hook)
     const user = await User.create({ name, email, password });
+
+    // Auto-create a referral coupon for this user (10% discount)
+    try {
+      await Coupon.create({
+        code: user.referralCode,
+        type: 'referral',
+        discountType: 'percentage',
+        discountValue: 10,
+        usageLimit: null, // unlimited
+        createdBy: user._id,
+        isActive: true,
+      });
+    } catch (couponErr) {
+      // Non-critical: log but don't fail registration
+      console.error('Failed to create referral coupon:', couponErr.message);
+    }
 
     res.status(201).json({
       success: true,
@@ -28,6 +45,7 @@ exports.register = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        referralCode: user.referralCode,
         token: generateToken(user._id),
       },
     });
@@ -63,6 +81,7 @@ exports.login = async (req, res) => {
         role: user.role,
         purchasedCourses: user.purchasedCourses,
         totalTimeSpent: user.totalTimeSpent,
+        referralCode: user.referralCode,
         token: generateToken(user._id),
       },
     });
@@ -81,3 +100,4 @@ exports.getProfile = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
