@@ -35,7 +35,7 @@ const seedAdmin = async () => {
       const course = await Course.create({
         title: 'Complete Web Development Bootcamp',
         description: 'Learn HTML, CSS, JavaScript, React, Node.js and more. Build 10+ real-world projects from scratch. Go from zero to full-stack developer with this comprehensive course.',
-        price: 49,
+        price: 249,
         thumbnail: '',
       });
 

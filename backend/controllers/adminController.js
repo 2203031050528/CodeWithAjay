@@ -80,7 +80,7 @@ exports.getAllUsers = async (req, res) => {
 exports.createCourse = async (req, res) => {
   try {
     const { title, description, price, thumbnail } = req.body;
-    const course = await Course.create({ title, description, price: price || 49, thumbnail });
+    const course = await Course.create({ title, description, price: price || 249, thumbnail });
     res.status(201).json({ success: true, data: course });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });

@@ -13,7 +13,7 @@ const AdminCourses = () => {
   const [showVideoModal, setShowVideoModal] = useState(false);
   const [editCourse, setEditCourse] = useState(null);
   const [selectedCourseId, setSelectedCourseId] = useState(null);
-  const [formData, setFormData] = useState({ title: '', description: '', price: 49, thumbnail: '' });
+  const [formData, setFormData] = useState({ title: '', description: '', price: 249, thumbnail: '' });
   const [videoForm, setVideoForm] = useState({ title: '', contentUrl: '', file: null, contentType: 'video', duration: 0, topicId: '' });
   const [uploading, setUploading] = useState(false);
 
@@ -42,7 +42,7 @@ const AdminCourses = () => {
       }
       setShowModal(false);
       setEditCourse(null);
-      setFormData({ title: '', description: '', price: 49, thumbnail: '' });
+      setFormData({ title: '', description: '', price: 249, thumbnail: '' });
       fetchCourses();
     } catch (error) {
       toast.error(error.response?.data?.message || 'Failed to save course');
@@ -122,7 +122,7 @@ const AdminCourses = () => {
     setFormData({
       title: course.title,
       description: course.description || '',
-      price: course.price || 49,
+      price: course.price || 249,
       thumbnail: course.thumbnail || '',
     });
     setShowModal(true);
@@ -147,7 +147,7 @@ const AdminCourses = () => {
       <p className="text-slate-400 text-sm mb-6 ml-8">Create, edit, and manage courses and their videos</p>
 
       <button
-        onClick={() => { setEditCourse(null); setFormData({ title: '', description: '', price: 49, thumbnail: '' }); setShowModal(true); }}
+        onClick={() => { setEditCourse(null); setFormData({ title: '', description: '', price: 249, thumbnail: '' }); setShowModal(true); }}
         className="gradient-btn text-sm mb-6"
       >
         <HiPlus /> Add New Course

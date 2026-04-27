@@ -9,7 +9,7 @@ const razorpayInstance = new Razorpay({
 (async () => {
     try {
         const options = {
-            amount: 4900,
+            amount: 24900,
             currency: 'INR',
             receipt: 'receipt_69db1b9c246b309461078bca_69db2d6d5787696b26aeb217_1775972515000'
         };

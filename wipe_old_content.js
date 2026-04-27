@@ -12,7 +12,7 @@ const Video = require('./backend/models/Video');
     await Course.create({
         title: 'Full AI Engineer Syllabus',
         description: 'Master Python, Machine Learning, Deep Learning, LLMs, RAG, AI Agents & more. One-time payment. Lifetime access. Start your AI career today.',
-        price: 49,
+        price: 249,
         thumbnail: ''
     });
 

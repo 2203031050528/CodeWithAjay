@@ -30,7 +30,7 @@ const Home = () => {
     { icon: <HiChip className="text-2xl" />, title: 'Python to AI Agents', desc: 'Complete roadmap from Python basics to building production AI agents & LLM applications', color: '#6366f1' },
     { icon: <HiClock className="text-2xl" />, title: 'Lifetime Access', desc: 'Pay once, learn forever. Access all course content anytime, anywhere', color: '#06b6d4' },
     { icon: <HiShieldCheck className="text-2xl" />, title: 'Track Progress', desc: 'Monitor your learning journey with detailed progress tracking', color: '#10b981' },
-    { icon: <HiLightningBolt className="text-2xl" />, title: 'Just ₹49', desc: 'Premium AI education at an unbeatable price. No hidden fees, no subscriptions', color: '#f59e0b' },
+    { icon: <HiLightningBolt className="text-2xl" />, title: 'Just ₹249', desc: 'Premium AI education at an unbeatable price. No hidden fees, no subscriptions', color: '#f59e0b' },
   ];
 
   return (
@@ -75,7 +75,7 @@ const Home = () => {
                 background: 'linear-gradient(135deg, #f59e0b, #f43f5e)',
                 WebkitBackgroundClip: 'text',
                 WebkitTextFillColor: 'transparent',
-              }}>₹49</span>
+              }}>₹249</span>
             </h1>
 
             <p className="text-lg sm:text-xl text-slate-400 mb-10 max-w-2xl mx-auto animate-slide-up stagger-1">
@@ -107,7 +107,7 @@ const Home = () => {
               {[
                 { num: '11', label: 'Modules' },
                 { num: '200+', label: 'Topics' },
-                { num: '₹49', label: 'Lifetime' },
+                { num: '₹249', label: 'Lifetime' },
               ].map((s, i) => (
                 <div key={i} className="text-center">
                   <p className="text-2xl font-bold text-white">{s.num}</p>
@@ -172,7 +172,7 @@ const Home = () => {
           <div className="text-center mt-12 pt-8" style={{
             borderTop: '1px solid rgba(99, 102, 241, 0.1)',
           }}>
-            <p className="text-slate-400 text-lg mb-6">All this for just <span className="text-amber-400 font-bold text-2xl">₹49</span> — Lifetime Access</p>
+            <p className="text-slate-400 text-lg mb-6">All this for just <span className="text-amber-400 font-bold text-2xl">₹249</span> — Lifetime Access</p>
             {isAuthenticated ? (
               <Link to="/dashboard" className="gradient-btn text-lg !py-4 !px-10 no-underline">
                 Go to Dashboard <HiArrowRight className="ml-1" />
@@ -232,14 +232,14 @@ const Home = () => {
         </div>
         <div className="max-w-3xl mx-auto text-center relative z-10">
           <h2 className="text-3xl sm:text-4xl font-bold text-white mb-4">Ready to Become an AI Engineer?</h2>
-          <p className="text-slate-400 text-lg mb-8">Join thousands of students mastering AI. Just ₹49 for lifetime access to the complete curriculum.</p>
+          <p className="text-slate-400 text-lg mb-8">Join thousands of students mastering AI. Just ₹249 for lifetime access to the complete curriculum.</p>
           {isAuthenticated ? (
             <Link to="/dashboard" className="gradient-btn text-lg !py-4 !px-10 no-underline">
               Continue Learning <HiArrowRight className="ml-1" />
             </Link>
           ) : (
             <Link to="/register" className="gradient-btn text-lg !py-4 !px-10 no-underline animate-pulse-glow">
-              Sign Up Now — It's ₹49 Only <HiArrowRight className="ml-1" />
+              Sign Up Now — It's ₹249 Only <HiArrowRight className="ml-1" />
             </Link>
           )}
         </div>

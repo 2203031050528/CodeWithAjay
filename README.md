@@ -1,6 +1,6 @@
 # CodeWithAjay — AI Learning Platform
 
-A full-stack learning platform where students pay ₹49 for lifetime access to coding courses, track their progress, and watch embedded YouTube videos.
+A full-stack learning platform where students pay ₹249 for lifetime access to coding courses, track their progress, and watch embedded YouTube videos.
 
 ## 🚀 Tech Stack
 
