@@ -122,12 +122,22 @@ Open **http://localhost:5173** in your browser.
 - **📚 Course Discovery**: Browse available coding courses with lifetime access.
 - **💳 Seamless Payments**: Integration with Razorpay for secure course purchases.
 - **🎬 Interactive Learning**: Watch high-quality video content via embedded players.
+- **🤖 AI Doubt Solver (Ajay AI)**: Context-aware AI chatbot using Gemini to answer questions instantly.
+- **💻 Coding Practice Sandbox**: In-browser VS Code-style editor (Monaco) to write and execute code securely.
+- **🎮 Gamification (XP & Levels)**: Earn XP and level up by watching videos, coding, commenting, and logging in.
+- **🔥 Streak System**: Build daily learning streaks to stay motivated.
+- **📜 Automated Certificates**: Generate valid, verifiable PDF certificates upon 100% course completion.
+- **💬 Community Discussions**: Ask questions and reply to other students on specific video lessons.
+- **🔔 Smart Notifications**: Real-time bell alerts for replies, level ups, streaks, and purchases.
+- **⏯️ Continue Learning**: Dashboard widget tracking your last watched position to resume effortlessly.
 - **📊 Progress Tracking**: Automatically track completion percentage and time spent on each lesson.
 - **📈 Learning Activity**: Visualize daily learning habits with interactive activity charts.
 - **🎟️ Referral System**: Apply partner coupons to get discounts on course purchases.
 - **🤝 Partner Program**: High-performing users can become partners to generate referral income.
 
 ### 🛠️ Admin Features
+- **📈 Advanced Analytics**: Interactive Chart.js visualisations for revenue, user growth, and performance trends.
+- **🧩 Problem Management**: Create coding challenges with hidden test cases and set XP rewards.
 - **📊 Business Dashboard**: Real-time stats on revenue, user growth, and platform activity.
 - **📚 Course Management**: Complete CRUD operations for courses and syllabus topics.
 - **🎬 Content Control**: Easily add or remove video lessons for any course.
