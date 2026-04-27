@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { HiMenuAlt3, HiX, HiAcademicCap, HiLogout, HiUser, HiChartBar, HiCog } from 'react-icons/hi';
+import NotificationBell from './NotificationBell';
+import { HiMenuAlt3, HiX, HiAcademicCap, HiLogout, HiUser, HiChartBar, HiCog, HiCode } from 'react-icons/hi';
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -38,7 +39,8 @@ const Navbar = () => {
             {isAuthenticated && (
               <>
                 <Link to="/dashboard" className="text-slate-300 hover:text-white transition-colors no-underline text-sm font-medium">Dashboard</Link>
-                <Link to="/progress" className="text-slate-300 hover:text-white transition-colors no-underline text-sm font-medium">Progress</Link>
+                <Link to="/coding" className="text-slate-300 hover:text-white transition-colors no-underline text-sm font-medium flex items-center gap-1"><HiCode /> Practice</Link>
+                <Link to="/certificates" className="text-slate-300 hover:text-white transition-colors no-underline text-sm font-medium">Certificates</Link>
               </>
             )}
             {isAdmin && (
@@ -52,6 +54,7 @@ const Navbar = () => {
           <div className="hidden md:flex items-center gap-3">
             {isAuthenticated ? (
               <>
+                <NotificationBell />
                 <div className="flex items-center gap-2 px-3 py-2 rounded-lg" style={{
                   background: 'rgba(99, 102, 241, 0.1)',
                   border: '1px solid rgba(99, 102, 241, 0.15)',

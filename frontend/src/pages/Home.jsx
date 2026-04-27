@@ -63,7 +63,7 @@ const Home = () => {
               border: '1px solid rgba(99, 102, 241, 0.2)',
             }}>
               <HiStar className="text-amber-400" />
-              <span className="text-sm text-slate-300">Complete AI Engineer Roadmap 2025</span>
+              <span className="text-sm text-slate-300">Complete AI Engineer Roadmap 2026</span>
             </div>
 
             <h1 className="text-4xl sm:text-5xl md:text-7xl font-black mb-6 leading-tight animate-slide-up">

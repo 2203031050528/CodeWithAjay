@@ -12,6 +12,9 @@ const {
   deleteVideo,
   getAllPayments,
   makePartner,
+  getRevenueAnalytics,
+  getUserAnalytics,
+  getCourseAnalytics,
 } = require('../controllers/adminController');
 const {
   getAllCoupons,
@@ -36,5 +39,10 @@ router.put('/make-partner/:userId', makePartner);
 router.get('/coupons', getAllCoupons);
 router.patch('/coupons/:id/toggle', toggleCoupon);
 router.delete('/coupons/:id', deleteCoupon);
+
+// Analytics
+router.get('/analytics/revenue', getRevenueAnalytics);
+router.get('/analytics/users', getUserAnalytics);
+router.get('/analytics/courses', getCourseAnalytics);
 
 module.exports = router;

@@ -273,3 +273,89 @@ exports.makePartner = async (req, res) => {
   }
 };
 
+// @desc    Get revenue analytics (last 30 days, grouped by day)
+// @route   GET /api/admin/analytics/revenue
+exports.getRevenueAnalytics = async (req, res) => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const revenue = await Payment.aggregate([
+      { $match: { status: 'paid', createdAt: { $gte: thirtyDaysAgo } } },
+      { $group: {
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+        total: { $sum: '$amount' },
+        count: { $sum: 1 },
+      }},
+      { $sort: { _id: 1 } },
+    ]);
+
+    res.json({ success: true, data: revenue });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get user growth analytics
+// @route   GET /api/admin/analytics/users
+exports.getUserAnalytics = async (req, res) => {
+  try {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+    const userGrowth = await User.aggregate([
+      { $match: { createdAt: { $gte: thirtyDaysAgo } } },
+      { $group: {
+        _id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
+        count: { $sum: 1 },
+      }},
+      { $sort: { _id: 1 } },
+    ]);
+
+    // Level distribution
+    const levelDist = await User.aggregate([
+      { $match: { role: { $in: ['user', 'partner'] } } },
+      { $group: { _id: '$level', count: { $sum: 1 } } },
+    ]);
+
+    res.json({ success: true, data: { userGrowth, levelDistribution: levelDist } });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Get course performance analytics
+// @route   GET /api/admin/analytics/courses
+exports.getCourseAnalytics = async (req, res) => {
+  try {
+    const courses = await Course.find().select('title').lean();
+
+    const courseStats = await Promise.all(
+      courses.map(async (course) => {
+        const enrollments = await User.countDocuments({ purchasedCourses: course._id });
+        const revenueResult = await Payment.aggregate([
+          { $match: { courseId: course._id, status: 'paid' } },
+          { $group: { _id: null, total: { $sum: '$amount' } } },
+        ]);
+        const avgProgress = await Progress.aggregate([
+          { $match: { courseId: course._id, completed: true } },
+          { $group: { _id: '$userId' } },
+        ]);
+        const totalVideos = await Video.countDocuments({ course: course._id });
+
+        return {
+          courseId: course._id,
+          title: course.title,
+          enrollments,
+          revenue: revenueResult[0]?.total || 0,
+          completions: avgProgress.length,
+          totalVideos,
+        };
+      })
+    );
+
+    res.json({ success: true, data: courseStats });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

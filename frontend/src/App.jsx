@@ -9,11 +9,17 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import CoursePage from './pages/CoursePage';
 import ProgressPage from './pages/ProgressPage';
+import CodingPractice from './pages/CodingPractice';
+import CodingProblem from './pages/CodingProblem';
+import CertificatesPage from './pages/CertificatesPage';
+import CertificateVerify from './pages/CertificateVerify';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import AdminCourses from './pages/admin/AdminCourses';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminPayments from './pages/admin/AdminPayments';
 import AdminCoupons from './pages/admin/AdminCoupons';
+import AdminAnalytics from './pages/admin/AdminAnalytics';
+import AdminProblems from './pages/admin/AdminProblems';
 
 function App() {
   return (
@@ -25,6 +31,7 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/verify/:certId" element={<CertificateVerify />} />
 
           {/* Protected User Routes */}
           <Route path="/dashboard" element={
@@ -35,6 +42,15 @@ function App() {
           } />
           <Route path="/progress" element={
             <ProtectedRoute><ProgressPage /></ProtectedRoute>
+          } />
+          <Route path="/coding" element={
+            <ProtectedRoute><CodingPractice /></ProtectedRoute>
+          } />
+          <Route path="/coding/:id" element={
+            <ProtectedRoute><CodingProblem /></ProtectedRoute>
+          } />
+          <Route path="/certificates" element={
+            <ProtectedRoute><CertificatesPage /></ProtectedRoute>
           } />
 
           {/* Admin Routes */}
@@ -52,6 +68,12 @@ function App() {
           } />
           <Route path="/admin/coupons" element={
             <AdminRoute><AdminCoupons /></AdminRoute>
+          } />
+          <Route path="/admin/analytics" element={
+            <AdminRoute><AdminAnalytics /></AdminRoute>
+          } />
+          <Route path="/admin/problems" element={
+            <AdminRoute><AdminProblems /></AdminRoute>
           } />
 
           {/* 404 */}

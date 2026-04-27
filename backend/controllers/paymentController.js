@@ -6,6 +6,7 @@ const Course = require('../models/Course');
 const Coupon = require('../models/Coupon');
 const CouponUsage = require('../models/CouponUsage');
 const { validateCoupon, calculateDiscount } = require('./couponController');
+const { notifyCoursePurchase } = require('../services/notificationService');
 
 // Initialize Razorpay
 const razorpayInstance = new Razorpay({
@@ -209,6 +210,12 @@ exports.verifyPayment = async (req, res) => {
     await User.findByIdAndUpdate(req.user._id, {
       $addToSet: { purchasedCourses: courseId },
     });
+
+    // Send purchase notification
+    const courseInfo = await Course.findById(courseId).select('title');
+    if (courseInfo) {
+      await notifyCoursePurchase(req.user._id, courseInfo.title, courseId);
+    }
 
     res.json({ success: true, message: 'Payment verified successfully. Course unlocked!' });
   } catch (error) {

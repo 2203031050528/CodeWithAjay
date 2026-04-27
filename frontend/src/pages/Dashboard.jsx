@@ -5,7 +5,10 @@ import API from '../api/axios';
 import StatsCard from '../components/StatsCard';
 import CourseCard from '../components/CourseCard';
 import useProgress from '../hooks/useProgress';
-import { HiBookOpen, HiClock, HiChartBar, HiAcademicCap, HiShare, HiClipboardCopy, HiCheck } from 'react-icons/hi';
+import GamificationBadge from '../components/GamificationBadge';
+import StreakDisplay from '../components/StreakDisplay';
+import ContinueLearning from '../components/ContinueLearning';
+import { HiBookOpen, HiClock, HiChartBar, HiAcademicCap, HiShare, HiClipboardCopy, HiCheck, HiLightningBolt, HiFire } from 'react-icons/hi';
 import toast from 'react-hot-toast';
 
 const Dashboard = () => {
@@ -15,6 +18,8 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [referralStats, setReferralStats] = useState(null);
   const [copied, setCopied] = useState(false);
+  const [gamification, setGamification] = useState(null);
+  const [dailyClaimed, setDailyClaimed] = useState(false);
   const { getProgress } = useProgress();
 
   useEffect(() => {
@@ -47,6 +52,17 @@ const Dashboard = () => {
         } catch (err) {
           console.error('Failed to load referral stats:', err);
         }
+
+        // Fetch gamification profile
+        try {
+          const { data: gamData } = await API.get('/gamification/profile');
+          setGamification(gamData.data);
+          // Check if daily login already claimed today
+          const lastClaimed = gamData.data?.streak?.isActiveToday;
+          setDailyClaimed(!!lastClaimed);
+        } catch (err) {
+          console.error('Failed to load gamification:', err);
+        }
       } catch (error) {
         console.error('Failed to load dashboard:', error);
       } finally {
@@ -54,7 +70,7 @@ const Dashboard = () => {
       }
     };
     fetchData();
-  }, []);
+  }, []);;
 
   const formatTime = (seconds) => {
     if (!seconds || seconds === 0) return '0m';
@@ -81,6 +97,19 @@ const Dashboard = () => {
     }
   };
 
+  const handleClaimDaily = async () => {
+    try {
+      const { data } = await API.post('/gamification/claim-daily');
+      toast.success(`+${data.data.xpEarned} XP earned! 🎉`);
+      setDailyClaimed(true);
+      // Refresh gamification data
+      const { data: gamData } = await API.get('/gamification/profile');
+      setGamification(gamData.data);
+    } catch (err) {
+      toast.error(err.response?.data?.message || 'Failed to claim');
+    }
+  };
+
   if (loading) {
     return (
       <div className="page-container flex items-center justify-center min-h-[60vh]">
@@ -103,42 +132,60 @@ const Dashboard = () => {
               Welcome back, <span className="gradient-text">{user?.name}</span>! 👋
             </h1>
             <p className="text-slate-400 text-sm">Keep up the great work on your learning journey</p>
+            {gamification && (
+              <div className="mt-2">
+                <GamificationBadge xp={gamification.xp} level={gamification.level} size="md" />
+              </div>
+            )}
           </div>
-          <Link to="/progress" className="gradient-btn text-sm no-underline">
-            <HiChartBar /> View Progress
-          </Link>
+          <div className="flex items-center gap-3">
+            {!dailyClaimed && (
+              <button onClick={handleClaimDaily} className="text-sm px-4 py-2 rounded-xl font-medium cursor-pointer transition-all flex items-center gap-1.5"
+                style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(239, 68, 68, 0.15))', border: '1px solid rgba(245, 158, 11, 0.3)', color: '#fbbf24' }}
+                id="claim-daily-btn">
+                <HiFire /> Claim Daily XP
+              </button>
+            )}
+            <Link to="/progress" className="gradient-btn text-sm no-underline">
+              <HiChartBar /> View Progress
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
-        <StatsCard
-          icon={<HiBookOpen />}
-          label="Enrolled Courses"
-          value={enrolledCourses.length}
-          color="#6366f1"
-        />
-        <StatsCard
-          icon={<HiChartBar />}
-          label="Avg. Progress"
-          value={avgProgress}
-          suffix="%"
-          color="#06b6d4"
-        />
-        <StatsCard
-          icon={<HiClock />}
-          label="Time Spent"
-          value={Math.floor((user?.totalTimeSpent || 0) / 60)}
-          suffix="m"
-          color="#10b981"
-        />
-        <StatsCard
-          icon={<HiAcademicCap />}
-          label="Completed"
-          value={Object.values(progressMap).filter(p => p === 100).length}
-          color="#f59e0b"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <StatsCard icon={<HiBookOpen />} label="Enrolled Courses" value={enrolledCourses.length} color="#6366f1" />
+        <StatsCard icon={<HiChartBar />} label="Avg. Progress" value={avgProgress} suffix="%" color="#06b6d4" />
+        <StatsCard icon={<HiLightningBolt />} label="Total XP" value={gamification?.xp || 0} color="#f59e0b" />
+        <StatsCard icon={<HiAcademicCap />} label="Completed" value={Object.values(progressMap).filter(p => p === 100).length} color="#10b981" />
       </div>
+
+      {/* Streak + XP Progress */}
+      {gamification && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-10">
+          <StreakDisplay
+            currentStreak={gamification.streak?.currentStreak || 0}
+            longestStreak={gamification.streak?.longestStreak || 0}
+          />
+          {/* XP Progress to next level */}
+          <div className="glass-card p-4">
+            <p className="text-xs text-slate-500 mb-2">Progress to {gamification.nextLevel || 'Max Level'}</p>
+            <div className="w-full h-3 rounded-full overflow-hidden mb-2" style={{ background: 'rgba(15, 13, 26, 0.6)' }}>
+              <div className="h-full rounded-full transition-all duration-500" style={{
+                width: `${Math.min(gamification.xpProgress || 0, 100)}%`,
+                background: 'linear-gradient(90deg, #6366f1, #06b6d4)',
+              }} />
+            </div>
+            <p className="text-xs text-slate-500">
+              {gamification.nextLevel ? `${gamification.xpNeeded} XP to ${gamification.nextLevel}` : '🏆 Max level reached!'}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Continue Learning */}
+      <ContinueLearning />
 
       {/* Referral Section — only visible to partners and admins */}
       {referralStats?.eligible && referralStats?.referralCode && (

@@ -8,6 +8,8 @@ import ProgressBar from '../components/ProgressBar';
 import Syllabus from '../components/Syllabus';
 import syllabusData from '../data/syllabusData';
 import useProgress from '../hooks/useProgress';
+import AIChatPanel from '../components/AIChatPanel';
+import CommentSection from '../components/CommentSection';
 import { HiPlay, HiCheckCircle, HiLockClosed, HiClock, HiCollection, HiArrowLeft, HiBookOpen } from 'react-icons/hi';
 
 const CoursePage = () => {
@@ -202,6 +204,21 @@ const CoursePage = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {/* AI Chat Panel — only for purchased courses */}
+      {hasPurchased && (
+        <AIChatPanel
+          courseId={course._id}
+          videoId={activeVideo?._id}
+          courseName={course.title}
+          videoTitle={activeVideo?.title}
+        />
+      )}
+
+      {/* Comments Section — only for purchased courses */}
+      {hasPurchased && (
+        <CommentSection courseId={course._id} videoId={activeVideo?._id} />
       )}
     </div>
   );

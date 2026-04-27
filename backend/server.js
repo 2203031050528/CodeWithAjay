@@ -29,6 +29,13 @@ app.use('/api/payment', require('./routes/payment'));
 app.use('/api/progress', require('./routes/progress'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/coupons', require('./routes/couponRoutes'));
+// === New feature routes ===
+app.use('/api/ai', require('./routes/ai'));
+app.use('/api/coding', require('./routes/coding'));
+app.use('/api/gamification', require('./routes/gamification'));
+app.use('/api/certificates', require('./routes/certificate'));
+app.use('/api/comments', require('./routes/comments'));
+app.use('/api/notifications', require('./routes/notifications'));
 
 // Health check
 app.get('/api/health', (req, res) => {

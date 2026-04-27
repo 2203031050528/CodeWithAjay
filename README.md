@@ -117,19 +117,73 @@ Open **http://localhost:5173** in your browser.
 
 ## 📱 Features
 
-### Student
-- 🔐 Sign up / Login with JWT auth
-- 📚 Browse and purchase courses (₹49)
-- 🎬 Watch videos (YouTube embed)
-- 📊 Track progress (% complete, time spent)
-- 📈 Daily activity chart
+### 🎓 Student Features
+- **🔐 Secure Auth**: Sign up and login with JWT-based authentication.
+- **📚 Course Discovery**: Browse available coding courses with lifetime access.
+- **💳 Seamless Payments**: Integration with Razorpay for secure course purchases.
+- **🎬 Interactive Learning**: Watch high-quality video content via embedded players.
+- **📊 Progress Tracking**: Automatically track completion percentage and time spent on each lesson.
+- **📈 Learning Activity**: Visualize daily learning habits with interactive activity charts.
+- **🎟️ Referral System**: Apply partner coupons to get discounts on course purchases.
+- **🤝 Partner Program**: High-performing users can become partners to generate referral income.
 
-### Admin
-- 📊 Dashboard with revenue, users, activity stats
-- 📚 Create/Edit/Delete courses
-- 🎬 Add/Remove videos
-- 👥 View all users with purchase status
-- 💳 View all payment transactions
+### 🛠️ Admin Features
+- **📊 Business Dashboard**: Real-time stats on revenue, user growth, and platform activity.
+- **📚 Course Management**: Complete CRUD operations for courses and syllabus topics.
+- **🎬 Content Control**: Easily add or remove video lessons for any course.
+- **👥 User Management**: Monitor all registered users and their purchase history.
+- **👑 Role Management**: Promote regular users to "Partner" or "Admin" status.
+- **💳 Transaction Logs**: Full visibility into all payment transactions and statuses.
+- **🎫 Coupon Engine**: Create, toggle, and delete discount coupons for marketing.
+
+---
+
+## 📐 API Routes
+
+### 🔓 Public & Auth Routes
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET | /api/health | — | System health check |
+| POST | /api/auth/register | — | Register new user |
+| POST | /api/auth/login | — | User login & JWT issuance |
+| GET | /api/auth/profile | JWT | Get current user profile |
+| GET | /api/courses | — | Fetch all available courses |
+| GET | /api/courses/:id | Optional | Get course details (unlocks content if purchased) |
+
+### 💳 Payment & Progress
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET | /api/payment/key | — | Get Razorpay public key |
+| POST | /api/payment/create-order | JWT | Initialize a new course purchase order |
+| POST | /api/payment/verify | JWT | Verify Razorpay payment signature |
+| POST | /api/progress/update | JWT | Save lesson progress & time spent |
+| GET | /api/progress/:courseId | JWT | Fetch student progress for a specific course |
+| GET | /api/progress/daily/stats | JWT | Get activity data for the heat map chart |
+
+### 🎟️ Coupon & Referral
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| POST | /api/coupons/apply | JWT | Validate and apply a coupon to an order |
+| GET | /api/coupons/my-stats | JWT | Get personal referral stats (for Partners) |
+
+### 🛡️ Admin Routes
+| Method | Route | Auth | Description |
+|--------|-------|------|-------------|
+| GET | /api/admin/dashboard | Admin | Overview stats (Revenue, Users, etc.) |
+| GET | /api/admin/users | Admin | List all registered users |
+| PUT | /api/admin/make-partner/:userId | Admin | Promote a user to Partner role |
+| POST | /api/admin/course | Admin | Create a new course |
+| PUT | /api/admin/course/:id | Admin | Update course metadata |
+| DELETE | /api/admin/course/:id | Admin | Remove a course from platform |
+| POST | /api/admin/course/:id/video | Admin | Add a lesson video to a course |
+| DELETE | /api/admin/video/:id | Admin | Delete a specific lesson video |
+| GET | /api/admin/payments | Admin | View all payment logs |
+| GET | /api/admin/coupons | Admin | List all platform coupons |
+| POST | /api/coupons/create | Admin | Create a new discount coupon |
+| PATCH | /api/admin/coupons/:id/toggle | Admin | Enable/Disable a coupon |
+| DELETE | /api/admin/coupons/:id | Admin | Permanently delete a coupon |
+
+---
 
 ## 🚀 Deploy to Vercel
 
@@ -147,30 +201,8 @@ vercel --prod
 
 Update the `VITE_API_URL` in frontend to point to your deployed backend URL.
 
-## 📐 API Routes
+---
 
-| Method | Route | Auth | Description |
-|--------|-------|------|-------------|
-| POST | /api/auth/register | — | Register |
-| POST | /api/auth/login | — | Login |
-| GET | /api/auth/profile | JWT | Get profile |
-| GET | /api/courses | — | List courses |
-| GET | /api/courses/:id | Optional | Course detail |
-| GET | /api/payment/key | — | Razorpay key |
-| POST | /api/payment/create-order | JWT | Create order |
-| POST | /api/payment/verify | JWT | Verify payment |
-| POST | /api/progress/update | JWT | Update progress |
-| GET | /api/progress/:courseId | JWT | Get progress |
-| GET | /api/progress/daily/stats | JWT | Daily stats |
-| GET | /api/admin/dashboard | Admin | Stats |
-| GET | /api/admin/users | Admin | All users |
-| POST | /api/admin/course | Admin | Create course |
-| PUT | /api/admin/course/:id | Admin | Update course |
-| DELETE | /api/admin/course/:id | Admin | Delete course |
-| POST | /api/admin/course/:id/video | Admin | Add video |
-| DELETE | /api/admin/video/:id | Admin | Delete video |
-| GET | /api/admin/payments | Admin | All payments |
-
-## License
+## 📄 License
 
 MIT

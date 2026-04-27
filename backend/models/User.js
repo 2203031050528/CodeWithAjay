@@ -49,6 +49,38 @@ const userSchema = new mongoose.Schema({
     unique: true,
     sparse: true, // allows null values while maintaining uniqueness
   },
+  // === Gamification fields ===
+  xp: {
+    type: Number,
+    default: 0,
+  },
+  level: {
+    type: String,
+    enum: ['Beginner', 'Intermediate', 'Pro', 'Expert'],
+    default: 'Beginner',
+  },
+  // === Streak fields ===
+  currentStreak: {
+    type: Number,
+    default: 0,
+  },
+  longestStreak: {
+    type: Number,
+    default: 0,
+  },
+  lastActiveDate: {
+    type: Date,
+    default: null,
+  },
+  dailyLoginClaimed: {
+    type: Date,
+    default: null,
+  },
+  // === Notification counter ===
+  unreadNotifications: {
+    type: Number,
+    default: 0,
+  },
 }, {
   timestamps: true,
 });
